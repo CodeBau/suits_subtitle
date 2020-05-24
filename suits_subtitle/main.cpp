@@ -1,4 +1,4 @@
-#include <iostream>
+#include <iostream>           //input/output library
 #include <fstream>            //biblioteka do zapisywania danych, f- w nazwie od file
 #include <cstdlib>            //do exit
 #include <string>             //biblioeka do stringo
@@ -23,9 +23,9 @@ cin.ignore(numeric_limits<int>::max(), '\n'); - pan powiedzial ze lepiej tak
 
 using namespace std;
 
-vector <string> lista_slow;                                                                          //lista unikalnych s³ów
+vector <string> lista_slow;                                                                     //lista unikalnych s³ów
 vector <int> ile_slow;                                                                          //liczba powtorzen lista_slow w tekscie                                                                                                   
-int liczba_wersow;                                                                                 //liczba wybranych wersow do sprawdzenia
+int liczba_wersow;                                                                              //liczba wybranych wersow do sprawdzenia
 int nie_ma = 0;                                                                                 //warunek pomocniczy 
 string wiersz[999999];                                                                          //ilosc sprawdzanych wierszy
 string wers;                                                                                    //linijka sprawdzanego testu

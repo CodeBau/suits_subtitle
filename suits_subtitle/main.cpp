@@ -1,9 +1,9 @@
 #include <iostream>           //input/output library
-#include <fstream>            //biblioteka do zapisywania danych, f- w nazwie od file
-#include <cstdlib>            //do exit
-#include <string>             //biblioeka do stringo
-#include <vector>             // bliblioteka do vectorow
-#include <time.h>             // miezenie czasu
+#include <fstream>            //ofstream and ifstream/ create files, write to files, and read from files.
+#include <cstdlib>            //to use exit 
+#include <string>             //strings library
+#include <vector>             //vectors library
+#include <time.h>             //header defines four variable types, two macro and various functions for manipulating date and time.
 #include <cstdlib>             // czas
 
 

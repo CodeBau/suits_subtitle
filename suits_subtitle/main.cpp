@@ -1,84 +1,78 @@
-#include <iostream>           //input/output library
-#include <fstream>            //ofstream and ifstream/ create files, write to files, and read from files.
-#include <cstdlib>            //to use exit 
-#include <string>             //strings library
-#include <vector>             //vectors library
-#include <time.h>             //header defines four variable types, two macro and various functions for manipulating date and time.
-#include <cstdlib>             // czas
+#include <iostream>                        //input/output library
+#include <fstream>                         //ofstream and ifstream/ create files, write to files, and read from files.
+#include <cstdlib>                         //to use exit 
+#include <string>                          //strings library
+#include <vector>                          //vectors library
+#include <time.h>                          //header defines four variable types, two macro and various functions for manipulating date and time.
 
-
-//trzeba dodac funkcje ktora podaje przedzial oraz sprawdza czy podany znak jest liczba i czy nalezy do danego przedzialu
-/*
-int l=0;
-while ((l<1) || (l>20)) {
-cout << "Podaj liczbê (1-20): ";
-if (!(cin >> l)) {
-cin.clear();
-cin.ignore(1000, '\n');
-}
-}
-
-cin.ignore(numeric_limits<int>::max(), '\n'); - pan powiedzial ze lepiej tak
-*/
+//abbreviation (shorts) occurring - OCCURS, quantity - QTY
 
 using namespace std;
 
-vector <string> lista_slow;                                                                     //lista unikalnych s³ów
-vector <int> ile_slow;                                                                          //liczba powtorzen lista_slow w tekscie                                                                                                   
-int liczba_wersow;                                                                              //liczba wybranych wersow do sprawdzenia
-int nie_ma = 0;                                                                                 //warunek pomocniczy 
-string wiersz[999999];                                                                          //ilosc sprawdzanych wierszy
-string wers;                                                                                    //linijka sprawdzanego testu
-string slowo;                                                                                   //sprawdzane slowo
-char litera;                                                                                    //litera wzieta w iteracji do rozpatrzenia
-char litery[3];                                                                                 //tablica do sprawdzenia nastepnej litery
-int w;
-string ile;
-clock_t start, stop;
-double czas;
-int liczba_wszystkich_slow;
-int liczba_uniklanych_slow;
-int liczba_slow_wystepujacyh_raz;
+vector <string> wordlist;                  //list with unique words
+vector <int> words_quantity;               //number of occurrences of a given word in the text
+int verses_quantity_2_check;               //number of verses to check entered by the user
+int word_not_occur = 0;                    //auxiliary(helper) variable to check the prevalence of the word list
+string text_line_from_file[999999];        //tooked line of text from the file/ max 999999
+string text_line;                          //currently checking text line
+string word;                               //single word selected from the text line
+char letter;                               //single letter from the selected line of text
+char preceding_letters[3];                 //letters preceding the selected letter
+int number_lines_in_file;                  //number of text lines present in the file
+string auxiliary_how_much;                 //helper variable for calculating the text line in a text file 
+clock_t start, stop;                       //variables needed to measure the time it takes to perform a function
+double time_to_do_wordlist;                //how much time is needed to create a word list
+int all_words_quantity;                    //how many words are in the text, from the verses selected by the user
+int unique_words_quantity;                 //how many UNIQUE words are in the text, from the verses selected by the user
+int once_occurring_word_quantity;          //how many words occur only once in the text, from the verses selected by the user
 
 
-void dodawanie_litera()
+//void adding another letter at the end of a string word
+void adding_letters()
 {
     //cout << "To jest litera ktora bedzie dodana:/" <<litera<<"/"<< endl;
-    slowo += litera;
+    word += letter;
     //cout << "To slowo:/" << slowo << "/" << endl;
 }
 
-void lista()                                                                            //wyswietla zawartosci listy, wszystkich slow z okreslonego zakresu
+
+//void showing wordlist, from verses selected by the user
+void show_wordlist()                                                                            
 {
-    cout << "===============LISTA S£ÓW===============" << endl;
-    for (unsigned int i = 0; i < lista_slow.size(); i++)
+    cout << "======================WORDLIST======================" << endl;
+    for (unsigned int i = 0; i < wordlist.size(); i++)
     {
-        cout << "/" << lista_slow[i] << "/-/" << ile_slow[i] << "/";
+        cout << "/" << wordlist[i] << "/-/" << words_quantity[i] << "/";
         cout << endl;
     }
     cout << endl;
-    cout << "===============KONIEC LISTY=================" << endl;
+    cout << "================END OD THE WORDLIST=================" << endl;
 }
-void dodanie_slowa()
+
+
+//void adds new, previously not occurring, word.
+void adding_word()
 {
-    lista_slow.push_back(slowo);
-    ile_slow.push_back(1);
-    slowo.clear();
-    liczba_uniklanych_slow++;
-    liczba_slow_wystepujacyh_raz++;
+    wordlist.push_back(word);
+    words_quantity.push_back(1);
+    word.clear();
+    unique_words_quantity++;
+    once_occurring_word_quantity++;
     //cout << "slowo PO USUNIECIU :/" << slowo <<"/"<< endl;
     //cout << "Uniklanych slow:/" << liczba_uniklanych_slow << "/" << endl;
     //cout << "Slow wystepujacych tylko raz: /" << liczba_slow_wystepujacyh_raz << "/" << endl;
 }
 
-void sprawdzenie()                                                                      //sprawdza czy slowo jest na liscie
+
+//void checking if the word did not appear earlier or not already on the list.
+void check_occurrence()                                                                      
 {
     //lista();
     //cout << "SPRAWDZAM CZY DODAC NOWE SLOWO:/" << slowo << "/" << endl;
 
 
     //sprawdzam czy slowo nie jest spacja
-    if (slowo == "")
+    if (word == "")
     {
         //cout << "Nie dodaje spacji" << endl;
     }
@@ -86,39 +80,39 @@ void sprawdzenie()                                                              
     //jesli slowo jest rozne od spacji 
     else
     {
-        liczba_wszystkich_slow++;
+        all_words_quantity++;
         //cout << "Wszystkich slow: /" << liczba_wszystkich_slow << "/" << endl;
 
         //sprawdzam czy jest jakies(chociaz 1) slowo na liscie
-        if (lista_slow.size() == 0)
+        if (wordlist.size() == 0)
         {
             //cout << "Dodaje pierwsze slowo" << endl;
-            dodanie_slowa();
+            adding_word();
 
         }
         else
         {
             //jesli jest jakies(chociaz jedno) slowo na liscie to sprawdzam czy wystepuje takie samo jak chcemy dodac
-            for (unsigned int j = 0; j < lista_slow.size(); j++)
+            for (unsigned int j = 0; j < wordlist.size(); j++)
             {
-                nie_ma = 0;
+                word_not_occur = 0;
 
                 //jesli trafie na takie slowo
-                if (lista_slow[j] == slowo)
+                if (wordlist[j] == word)
                 {
-                    slowo.clear();
+                    word.clear();
                     //cout << "sprawdzam czy na liscie slow jest wiecej niz 1" << endl;
                     //cout << "ile_slow[j]:/" << ile_slow[j]<<"/"<<endl;
                     //cout << "ile_slow[0]:/" << ile_slow[0]<<"/"<<endl;
 
 
                     //sprawdzam czy na liscie jest wiecej slow niz jedno zebym musial pozycjonowac
-                    if (lista_slow.size() > 1)
+                    if (wordlist.size() > 1)
                     {
                         //cout << "Jest wiecej slow niz 1" << endl;
 
                         //sprawdzam czy wczesniej wystapilo tylko raz, jesli tak to zamieniam ostatnia pojedyncza pozycje
-                        if (ile_slow[j] == 1)
+                        if (words_quantity[j] == 1)
                         {
                             //cout << "=====To slowo wystapilo wczesniej 1 raz" << endl;
                             //lista();
@@ -127,34 +121,34 @@ void sprawdzenie()                                                              
                             //cout << "liczba_slow_wystepujacyh_raz:/" << liczba_slow_wystepujacyh_raz << "/" << endl;
                             //cout << "lista_slow.size():/" << lista_slow.size() << "/" << endl;
 
-                            ile_slow[j]++;
+                            words_quantity[j]++;
                             //cout << "Zwiekszamy ile_slow[j] na 2:/" << ile_slow[j] << "/" << endl;
-                            string tempslowo = lista_slow[j];
-                            int tempile_slow = ile_slow[j];
+                            string tempslowo = wordlist[j];
+                            int tempile_slow = words_quantity[j];
                             //cout << "tempslowo:" << tempslowo << "-" << tempile_slow << endl;
                             //cout << "lista_slow[lista_slow.size()-liczba_slow_wystepujacyh_raz]:" << lista_slow[lista_slow.size() - liczba_slow_wystepujacyh_raz] << "-" << ile_slow[lista_slow.size() - liczba_slow_wystepujacyh_raz] << endl;
-                            lista_slow[j] = lista_slow[lista_slow.size() - liczba_slow_wystepujacyh_raz];
-                            ile_slow[j] = ile_slow[lista_slow.size() - liczba_slow_wystepujacyh_raz];
+                            wordlist[j] = wordlist[wordlist.size() - once_occurring_word_quantity];
+                            words_quantity[j] = words_quantity[wordlist.size() - once_occurring_word_quantity];
                             //cout << "Po zamianie lista_slow[j]:" << lista_slow[j] << "-" << ile_slow[j] << endl;
                             //lista();
-                            lista_slow[lista_slow.size() - liczba_slow_wystepujacyh_raz] = tempslowo;
-                            ile_slow[lista_slow.size() - liczba_slow_wystepujacyh_raz] = tempile_slow;
+                            wordlist[wordlist.size() - once_occurring_word_quantity] = tempslowo;
+                            words_quantity[wordlist.size() - once_occurring_word_quantity] = tempile_slow;
                             //lista();
 
-                            liczba_slow_wystepujacyh_raz--;
+                            once_occurring_word_quantity--;
                             //cout << "Uniklanych slow:/" << liczba_slow_wystepujacyh_raz << "/" << endl;
                         }
                         //sprawdzam czy slowo jest najczesciej wystepujacym
-                        else if (ile_slow[j] == ile_slow[0] && ile_slow[0] != ile_slow[1])
+                        else if (words_quantity[j] == words_quantity[0] && words_quantity[0] != words_quantity[1])
                         {
                             //cout << "Slowo najczesciej wystepujace" << endl;
-                            ile_slow[j]++;
+                            words_quantity[j]++;
                         }
                         //po odrzuceniu skrajnych warunkow na wystapienie tylko raz oraz na najczesciej wystepujace slowo sprawdzam pozycje
                         else
                         {
-                            nie_ma = 0;
-                            ile_slow[j]++;
+                            word_not_occur = 0;
+                            words_quantity[j]++;
                             int ile_w_gore = 0;
 
                             for (int e = j - 1; e >= 0; e--)
@@ -164,7 +158,7 @@ void sprawdzenie()                                                              
                                 //cout << "porownuje slowo:/" << lista_slow[j] << "/-/" << ile_slow[j] << "/ ze slowem:/" << lista_slow[e] << "/-/" << ile_slow[e] << "/" << endl;
 
                                 //jesli pozycja wyzej wystepuje mniej razy niz dodawane slowo to dodaje przesuniecie o jedna poyzcje w gore
-                                if (ile_slow[j] > ile_slow[e])
+                                if (words_quantity[j] > words_quantity[e])
                                 {
                                     // cout << "Warunek j>e jest spelniony, zwiekszam ile w gore" << endl;
                                     ile_w_gore++;
@@ -181,16 +175,16 @@ void sprawdzenie()                                                              
                             if (ile_w_gore > 0)
                             {
                                 //cout << "Ile_w_gore wieksze od zera" << endl;
-                                string tempslowo = lista_slow[j];
-                                int tempile_slow = ile_slow[j];
+                                string tempslowo = wordlist[j];
+                                int tempile_slow = words_quantity[j];
                                 //cout << "tempslowo:" << tempslowo << "-" << tempile_slow << endl;
                                 //cout << "lista_slow[j-ile_w_gore]:" << lista_slow[j - ile_w_gore] << "-" << ile_slow[j - ile_w_gore] << endl;
-                                lista_slow[j] = lista_slow[j - ile_w_gore];
-                                ile_slow[j] = ile_slow[j - ile_w_gore];
+                                wordlist[j] = wordlist[j - ile_w_gore];
+                                words_quantity[j] = words_quantity[j - ile_w_gore];
                                 //cout << "Po zamianie lista_slow[j]:" << lista_slow[j] << "-" << ile_slow[j] << endl;
                                 //lista();
-                                lista_slow[j - ile_w_gore] = tempslowo;
-                                ile_slow[j - ile_w_gore] = tempile_slow;
+                                wordlist[j - ile_w_gore] = tempslowo;
+                                words_quantity[j - ile_w_gore] = tempile_slow;
                                 //lista();
                             }
                         }
@@ -207,25 +201,27 @@ void sprawdzenie()                                                              
                 //nie ma takiego slowa na lisicie, wywolujemy if dodoawania slowa na liste
                 else
                 {
-                    nie_ma = 1;
+                    word_not_occur = 1;
                 }
             }
             //sprawdzamy warunek niewystopienia slowa na liscie
-            if (nie_ma == 1)
+            if (word_not_occur == 1)
             {
                 //cout << "Dodaje nowe slowo" << slowo <<"/"<< endl;
-                dodanie_slowa();
+                adding_word();
 
             }
         }
     }
 }
 
-void ile_wersow()                                                       //sprawdza ile max wersów ma plik tekstowy
+
+//void checking how many lines of text per text file
+void check_how_many_lines()                                                       
 {
 
     fstream  plik;
-    plik.open("napisy.txt", ios::in);
+    plik.open("subtitles.txt", ios::in);
     if (plik.good() == false)
     {
         cout << "Brak pliku";
@@ -233,7 +229,7 @@ void ile_wersow()                                                       //sprawd
     }
     while (!plik.eof())
     {
-        while (getline(plik, ile)) ++w;
+        while (getline(plik, auxiliary_how_much)) ++number_lines_in_file;
 
     }
 
@@ -241,130 +237,132 @@ void ile_wersow()                                                       //sprawd
 
 }
 
+
+//main function of the program
 int main()
 {
     start = clock();
-    ile_wersow();
-    cout << "Plik z napisami zawiera:" << w << " wersow, ile chcesz wyswietlic?:" << endl;
-    cin >> liczba_wersow;
+    check_how_many_lines();
+    cout << "Plik z napisami zawiera:" << number_lines_in_file << " wersow, ile chcesz wyswietlic?:" << endl;
+    cin >> verses_quantity_2_check;
 
     fstream  plik;
 
-    plik.open("napisy.txt", ios::in);
+    plik.open("subtitles.txt", ios::in);
 
-    for (int i = 0; i <= liczba_wersow - 1; i++)
+    for (int i = 0; i <= verses_quantity_2_check - 1; i++)
     {
-        slowo = "";
-        getline(plik, wiersz[i]);
-        wers = wiersz[i];
+        word = "";
+        getline(plik, text_line_from_file[i]);
+        text_line = text_line_from_file[i];
 
-        for (int unsigned j = 0; j <= wers.length(); j++)
+        for (int unsigned j = 0; j <= text_line.length(); j++)
         {
-            if (wers.length() == 0)
+            if (text_line.length() == 0)
             {
             }
             else
             {
 
-                litera = wers[j];
+                letter = text_line[j];
                 //cout << "Litera to:/" << litera << "/" << endl;
-                litery[0] = wers[j];
+                preceding_letters[0] = text_line[j];
 
-                if (litery[0] == 0)
+                if (preceding_letters[0] == 0)
                 {
 
-                    litery[1] = 0;
+                    preceding_letters[1] = 0;
                 }
                 else
                 {
-                    litery[1] = wers[j + 1];
+                    preceding_letters[1] = text_line[j + 1];
 
                 }
-                if (litery[1] == 0)
+                if (preceding_letters[1] == 0)
                 {
 
-                    litery[2] = 0;
+                    preceding_letters[2] = 0;
                 }
                 else
                 {
-                    litery[2] = wers[j + 2];
+                    preceding_letters[2] = text_line[j + 2];
                 }
 
-                if (litery[1] == -124 && litery[0] == -60 || litery[1] == -123 && litery[0] == -60)                                                                       //¹ 124,123
+                if (preceding_letters[1] == -124 && preceding_letters[0] == -60 || preceding_letters[1] == -123 && preceding_letters[0] == -60)                                                                       //¹ 124,123
                 {
                     //cout << "tutaj jest a," << endl;
-                    litera = static_cast <char>(165);
-                    dodawanie_litera();
+                    letter = static_cast <char>(165);
+                    adding_letters();
                 }
-                else if (litery[1] == -122 && litery[0] == -60 || litery[1] == -121 && litery[0] == -60)                                                                  //æ 122,121 60
+                else if (preceding_letters[1] == -122 && preceding_letters[0] == -60 || preceding_letters[1] == -121 && preceding_letters[0] == -60)                                                                  //æ 122,121 60
                 {
                     //cout << "tutaj jest c'" << endl;
-                    litera = static_cast <char>(134);
-                    dodawanie_litera();
+                    letter = static_cast <char>(134);
+                    adding_letters();
                 }
-                else if (litery[1] == -104 && litery[0] == -60 || litery[1] == -103 && litery[0] == -60)                                                                   //ê 104,103 60
+                else if (preceding_letters[1] == -104 && preceding_letters[0] == -60 || preceding_letters[1] == -103 && preceding_letters[0] == -60)                                                                   //ê 104,103 60
                 {
                     //cout << "tutaj jest e," << endl;
-                    litera = static_cast <char>(169);
-                    dodawanie_litera();
+                    letter = static_cast <char>(169);
+                    adding_letters();
                 }
-                else if (litery[1] == -127 && litery[0] == -59 || litery[1] == -126 && litery[0] == -59)                                                                    //³ 127,126 59
+                else if (preceding_letters[1] == -127 && preceding_letters[0] == -59 || preceding_letters[1] == -126 && preceding_letters[0] == -59)                                                                    //³ 127,126 59
                 {
                     //cout << "tutaj jest l/" << endl;
-                    litera = static_cast <char>(136);
-                    dodawanie_litera();
+                    letter = static_cast <char>(136);
+                    adding_letters();
                 }
-                else if (litery[1] == -125 && litery[0] == -59 || litery[1] == -124 && litery[0] == -59)                                                                   //ñ 125, 124 59
+                else if (preceding_letters[1] == -125 && preceding_letters[0] == -59 || preceding_letters[1] == -124 && preceding_letters[0] == -59)                                                                   //ñ 125, 124 59
                 {
                     //cout << "tutaj jest n'" << endl;
-                    litera = static_cast <char>(228);
-                    dodawanie_litera();
+                    letter = static_cast <char>(228);
+                    adding_letters();
                 }
-                else if (litery[1] == -109 && litery[0] == -61 || litery[1] == -77 && litery[0] == -61)                                                                   //ó 109, 77 61
+                else if (preceding_letters[1] == -109 && preceding_letters[0] == -61 || preceding_letters[1] == -77 && preceding_letters[0] == -61)                                                                   //ó 109, 77 61
                 {
                     //cout << "tutaj jest o'" << endl;
-                    litera = static_cast <char>(162);
-                    dodawanie_litera();
+                    letter = static_cast <char>(162);
+                    adding_letters();
                 }
-                else if (litery[1] == -102 && litery[0] == -59 || litery[1] == -101 && litery[0] == -59)                                                                   //œ 101, 102 59
+                else if (preceding_letters[1] == -102 && preceding_letters[0] == -59 || preceding_letters[1] == -101 && preceding_letters[0] == -59)                                                                   //œ 101, 102 59
                 {
                     //cout << "tutaj jest s'" << endl;
-                    litera = static_cast <char>(152);
-                    dodawanie_litera();
+                    letter = static_cast <char>(152);
+                    adding_letters();
                 }
-                else if (litery[1] == -71 && litery[0] == -59 || litery[1] == -70 && litery[0] == -59)                                                                   //Ÿ 71, 70 59
+                else if (preceding_letters[1] == -71 && preceding_letters[0] == -59 || preceding_letters[1] == -70 && preceding_letters[0] == -59)                                                                   //Ÿ 71, 70 59
                 {
                     //cout << "tutaj jest z'" << endl;
-                    litera = static_cast <char>(171);
-                    dodawanie_litera();
+                    letter = static_cast <char>(171);
+                    adding_letters();
                 }
-                else if (litery[1] == -69 && litery[0] == -59 || litery[1] == -68 && litery[0] == -59)                                                                   //¿ 68, 69 59
+                else if (preceding_letters[1] == -69 && preceding_letters[0] == -59 || preceding_letters[1] == -68 && preceding_letters[0] == -59)                                                                   //¿ 68, 69 59
                 {
                     //cout << "tutaj jest z." << endl;
-                    litera = static_cast <char>(190);
-                    dodawanie_litera();
+                    letter = static_cast <char>(190);
+                    adding_letters();
                 }
-                else if (litery[0] >= 65 && litery[0] <= 90)                                                                                                            //zamieniamy wielkie litery na ma³e
+                else if (preceding_letters[0] >= 65 && preceding_letters[0] <= 90)                                                                                                            //zamieniamy wielkie litery na ma³e
                 {
                     //cout << "Zamieniamy wielka litere na mala" << endl;
-                    litera += 32;
-                    dodawanie_litera();
+                    letter += 32;
+                    adding_letters();
                 }
-                else if (litery[0] >= 97 && litery[0] <= 122)                                                                                                            //sprawdzenie malej litery
+                else if (preceding_letters[0] >= 97 && preceding_letters[0] <= 122)                                                                                                            //sprawdzenie malej litery
                 {
                     //cout << "To jest mala litera" << endl;
-                    dodawanie_litera();
+                    adding_letters();
                 }
-                else if (litery[0] == 32)                                                                                                                               //spacja nowe slowo
+                else if (preceding_letters[0] == 32)                                                                                                                               //spacja nowe slowo
                 {
                     //cout << "spacja dodaje slowo" << endl;
-                    sprawdzenie();
+                    check_occurrence();
                 }
 
-                else if (litery[0] == 0)
+                else if (preceding_letters[0] == 0)
                 {
                     //cout << "Jest koniec wersa dodaje slowo" << endl;
-                    sprawdzenie();
+                    check_occurrence();
                 }
 
 
@@ -374,31 +372,31 @@ int main()
 
     plik.close();
 
-    lista();
+    show_wordlist();
 
     cout << endl;
     //cout << "koniec wszystkiego" << endl << endl;
-    cout << "Wszystkich slow:/" << liczba_wszystkich_slow << "/" << endl;
-    cout << "Uniklanych slow:/" << liczba_uniklanych_slow << "/" << endl;
-    cout << "Slow wystepujacych tylko raz:/" << liczba_slow_wystepujacyh_raz << "/" << endl;
+    cout << "Wszystkich slow:/" << all_words_quantity << "/" << endl;
+    cout << "Uniklanych slow:/" << unique_words_quantity << "/" << endl;
+    cout << "Slow wystepujacych tylko raz:/" << once_occurring_word_quantity << "/" << endl;
 
     stop = clock();
-    czas = (stop - start) / CLOCKS_PER_SEC;
-    cout << "Potrzebny czas: " << czas << " sekund";
+    time_to_do_wordlist = (stop - start) / CLOCKS_PER_SEC;
+    cout << "Potrzebny czas: " << time_to_do_wordlist << " sekund";
 
     int liczba_wystapien_do_zapisu_poczatek;
     int liczba_wystapien_do_zapisu_koniec;
     char czy_uzyc_zbednych;
 
     cout << endl;
-    cout << "Od jakiej liczby wystapien slowa zapisac na liste: (W przedzial od " << ile_slow[0] << " - " << ile_slow[ile_slow.size() - 1] << ")";
+    cout << "Od jakiej liczby wystapien slowa zapisac na liste: (W przedzial od " << words_quantity[0] << " - " << words_quantity[words_quantity.size() - 1] << ")";
     cin >> liczba_wystapien_do_zapisu_poczatek;
     if (liczba_wystapien_do_zapisu_poczatek)
-        while (liczba_wystapien_do_zapisu_poczatek > ile_slow[0] || liczba_wystapien_do_zapisu_poczatek < ile_slow[ile_slow.size() - 1])
+        while (liczba_wystapien_do_zapisu_poczatek > words_quantity[0] || liczba_wystapien_do_zapisu_poczatek < words_quantity[words_quantity.size() - 1])
         {
 
             cout << "Podano bledna wartosc" << endl;
-            cout << "Od jakiej liczby wystapien slowa zapisac na liste: (Przedzial od " << ile_slow[0] << " - " << ile_slow[ile_slow.size() - 1] << ")";
+            cout << "Od jakiej liczby wystapien slowa zapisac na liste: (Przedzial od " << words_quantity[0] << " - " << words_quantity[words_quantity.size() - 1] << ")";
             cin >> liczba_wystapien_do_zapisu_poczatek;
         }
 

@@ -30,9 +30,7 @@ int once_occurring_word_quantity;          //how many words occur only once in t
 //void adding another letter at the end of a string word
 void adding_letters()
 {
-    //cout << "To jest litera ktora bedzie dodana:/" <<litera<<"/"<< endl;
-    word += letter;
-    //cout << "To slowo:/" << slowo << "/" << endl;
+    word += letter;  
 }
 
 

@@ -412,7 +412,7 @@ int main()
 	vector <string> userwordlist;			     //vector with filtered words in terms of quantity (and if the user has chosen so with the file known_words.txt)
 	int user_wordlist_quantity_start;            //up to what number of occurrences of words in the text should be accepted on the user's list
 	int user_wordlist_quantity_end;              //from what number of occurrences of words in the text should be included in the user's list
-	
+
 	cout << endl;
 	cout << "OD jakiej liczby wystapien slowa zapisac na liste, ";
 	user_wordlist_quantity_start = is_it_number(word_quantity[0], word_quantity[word_quantity.size() - 1]);
@@ -421,8 +421,21 @@ int main()
 	cout << "Czy przefiltrowac przez liste znanych slowek Tak/Nie ";
 	give_y_or_n();
 
-
-
+#pragma region CreatingKnownWordlist
+	/*
+	trzeba wgrac plik known_wors.txt jesli give_y_or_n da t;
+	jesli nie to pomijamy
+	*/
+#pragma endregion
+	/*
+	trzeba dac for po wordlist.size
+	if (word_quantity<user_wordlist_quantity_start && word_quantity>user_wordlist_quantity_end)
+	{
+	biezemy slowo 
+	jesli give_y_or_n jest t to sprawdzmy czy jest na liscie
+	jesli nie dajemy slowo na userwordlist;
+	}
+	*/
 
 #pragma endregion
 

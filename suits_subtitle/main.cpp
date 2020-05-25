@@ -10,7 +10,7 @@
 using namespace std;
 
 vector <string> wordlist;                  //list with unique words
-vector <int> words_quantity;               //number of occurrences of a given word in the text
+vector <int> word_quantity;               //number of occurrences of a given word in the text
 int verses_quantity_2_check;               //number of verses to check entered by the user
 int word_not_occur = 0;                    //auxiliary(helper) variable to check the prevalence of the word list
 string text_line_from_file[999999];        //tooked line of text from the file/ max 999999
@@ -40,7 +40,7 @@ void show_wordlist()
     cout << "======================WORDLIST======================" << endl;
     for (unsigned int i = 0; i < wordlist.size(); i++)
     {
-        cout << "/" << wordlist[i] << "/-/" << words_quantity[i] << "/";
+        cout << "/" << wordlist[i] << "/-/" << word_quantity[i] << "/";
         cout << endl;
     }
     cout << "================END OD THE WORDLIST=================" << endl;
@@ -51,7 +51,7 @@ void show_wordlist()
 void adding_word()
 {
     wordlist.push_back(word);
-    words_quantity.push_back(1);
+    word_quantity.push_back(1);
     word.clear();
     unique_words_quantity++;
     once_occurring_word_quantity++;
@@ -61,111 +61,100 @@ void adding_word()
 //void checking if the word did not appear earlier or not already on the list.
 void check_occurrence()                                                                      
 {
-    //sprawdzam czy slowo nie jest spacja
+    //if the word is a space, skip the next steps
     if (word == "")
     {
     }
 
-    //jesli slowo jest rozne od spacji 
     else
     {
         all_words_quantity++;
 
-       //sprawdzam czy jest jakies(chociaz 1) slowo na liscie
+       //checking if there is at least one word on the worlist (any word)
         if (wordlist.size() == 0)
         {
             adding_word();
-
         }
         else
         {
-            //jesli jest jakies(chociaz jedno) slowo na liscie to sprawdzam czy wystepuje takie samo jak chcemy dodac
+            //if there is a word on the list, check if the same word occurs
             for (unsigned int j = 0; j < wordlist.size(); j++)
             {
                 word_not_occur = 0;
 
-                //jesli trafie na takie slowo
                 if (wordlist[j] == word)
                 {
                     word.clear();
                     
-                    //sprawdzam czy na liscie jest wiecej slow niz jedno zebym musial pozycjonowac
+                    //checking if the wordlist has more than one word
                     if (wordlist.size() > 1)
                     {
 
-                        //sprawdzam czy wczesniej wystapilo tylko raz, jesli tak to zamieniam ostatnia pojedyncza pozycje
-                        if (words_quantity[j] == 1)
+                        //eliminating extreme cases / the word occurring once / the word most often occurring
+                        //checking if a word has appeared only once before, if so then the exchange occurs with the first word on the list that occurs once
+                        if (word_quantity[j] == 1)
                         {
-                            words_quantity[j]++;
-                            string tempslowo = wordlist[j];
-                            int tempile_slow = words_quantity[j];
+                            word_quantity[j]++;
+                            string tempword = wordlist[j];                                         //variable for temporarily storing a word
+                            int tempword_quantity = word_quantity[j];                              //variable for temporarily storing a word_quantity
                             wordlist[j] = wordlist[wordlist.size() - once_occurring_word_quantity];
-                            words_quantity[j] = words_quantity[wordlist.size() - once_occurring_word_quantity];
-                            wordlist[wordlist.size() - once_occurring_word_quantity] = tempslowo;
-                            words_quantity[wordlist.size() - once_occurring_word_quantity] = tempile_slow;
+                            word_quantity[j] = word_quantity[wordlist.size() - once_occurring_word_quantity];
+                            wordlist[wordlist.size() - once_occurring_word_quantity] = tempword;
+                            word_quantity[wordlist.size() - once_occurring_word_quantity] = tempword_quantity;
                             once_occurring_word_quantity--;
                         }
 
-                        //sprawdzam czy slowo jest najczesciej wystepujacym
-                        else if (words_quantity[j] == words_quantity[0] && words_quantity[0] != words_quantity[1])
+                        //checking if the word is the most common word
+                        else if (word_quantity[j] == word_quantity[0] && word_quantity[0] != word_quantity[1])
                         {
-                            words_quantity[j]++;
+                            word_quantity[j]++;
                         }
-                        //po odrzuceniu skrajnych warunkow na wystapienie tylko raz oraz na najczesciej wystepujace slowo sprawdzam pozycje
+
+                        //after rejecting extreme cases, checking from the most common words that are more common than words checked
                         else
                         {
                             word_not_occur = 0;
-                            words_quantity[j]++;
-                            int ile_w_gore = 0;
+                            word_quantity[j]++;
+                            int offset_value_up = 0;                                    //variable that specifies how many positions the word should be moved up
 
                             for (int e = j - 1; e >= 0; e--)
                             {
-                                //jesli pozycja wyzej wystepuje mniej razy niz dodawane slowo to dodaje przesuniecie o jedna poyzcje w gore
-                                if (words_quantity[j] > words_quantity[e])
+                                //checking for subsequent words, if it comes across a less common word then increases the upward shift by one position. If it encounters a more frequent item, it will stop checking
+                                if (word_quantity[j] > word_quantity[e])
                                 {
-                                    ile_w_gore++;
+                                    offset_value_up++;
                                 }
-
-                                //inaczej przestaje sprawdzac przesuniecie bo wszystkie pozycje wyzej na liscie wystepuja wiecej razy
-                                else
-                                {
-                                    break;
-                                }
+                                else break;
                             }
 
-                            //sprawdzam czy nastepuje przesuniecie w gore, jesli tak to przesuwam o tyle pozycji ile
-                            if (ile_w_gore > 0)
+                            //if the up offset value is greater than 0, it shifts positions as much as needed
+                            if (offset_value_up > 0)
                             {
-                                string tempslowo = wordlist[j];
-                                int tempile_slow = words_quantity[j];
-                                wordlist[j] = wordlist[j - ile_w_gore];
-                                words_quantity[j] = words_quantity[j - ile_w_gore];
-                                wordlist[j - ile_w_gore] = tempslowo;
-                                words_quantity[j - ile_w_gore] = tempile_slow;
+                                string tempword = wordlist[j];                                         //variable for temporarily storing a word
+                                int tempword_quantity = word_quantity[j];                              //variable for temporarily storing a word_quantity
+                                wordlist[j] = wordlist[j - offset_value_up];
+                                word_quantity[j] = word_quantity[j - offset_value_up];
+                                wordlist[j - offset_value_up] = tempword;
+                                word_quantity[j - offset_value_up] = tempword_quantity;
                             }
                         }
                     }
 
-                    //na liscie jest tylko jedno slowo nie ma potrzeby pozycjonowania 
-                    else
-                    {
-                    }
-
+                    //there is only one word on the list, there is no need for positioning
                     break;
                 }
 
-                //nie ma takiego slowa na lisicie, wywolujemy if dodoawania slowa na liste
+                //there is no such word on the list we call "if" adding words to the offer
                 else
                 {
                     word_not_occur = 1;
                 }
             }
 
-            //sprawdzamy warunek niewystopienia slowa na liscie
+            //checking the condition of the word being on the list
             if (word_not_occur == 1)
             {
                 adding_word();
-
             }
         }
     }
@@ -176,40 +165,38 @@ void check_occurrence()
 void check_how_many_lines()                                                       
 {
 
-    fstream  plik;
-    plik.open("subtitles.txt", ios::in);
-    if (plik.good() == false)
+    fstream  file;
+    file.open("subtitles.txt", ios::in);
+    if (file.good() == false)
     {
         cout << "Brak pliku";
         exit(0);
     }
-    while (!plik.eof())
+    while (!file.eof())
     {
-        while (getline(plik, auxiliary_how_much)) ++number_lines_in_file;
-
+        while (getline(file, auxiliary_how_much)) ++number_lines_in_file;
     }
-
-    plik.close();
-
+    file.close();
 }
-
 
 //main function of the program
 int main()
+
 {
+#pragma region CreatingWordlist
     start = clock();
     check_how_many_lines();
     cout << "Plik z napisami zawiera:" << number_lines_in_file << " wersow, ile chcesz wyswietlic?:" << endl;
     cin >> verses_quantity_2_check;
 
-    fstream  plik;
+    fstream  file;
 
-    plik.open("subtitles.txt", ios::in);
+    file.open("subtitles.txt", ios::in);
 
     for (int i = 0; i <= verses_quantity_2_check - 1; i++)
     {
-        word = "";
-        getline(plik, text_line_from_file[i]);
+        word = "";                                               //to make sure the word "zeroed"                
+        getline(file, text_line_from_file[i]);
         text_line = text_line_from_file[i];
 
         for (int unsigned j = 0; j <= text_line.length(); j++)
@@ -217,15 +204,15 @@ int main()
             if (text_line.length() == 0)
             {
             }
+            //checking subsequent letters / skipping special characters / converting to Polish characters/ lowercase characters
             else
             {
-
+                //defining preceding characters before the checked letter / checking if there are any preceding characters
                 letter = text_line[j];
                 preceding_letters[0] = text_line[j];
 
                 if (preceding_letters[0] == 0)
                 {
-
                     preceding_letters[1] = 0;
                 }
                 else
@@ -243,6 +230,7 @@ int main()
                     preceding_letters[2] = text_line[j + 2];
                 }
 
+                //converting to Polish characters
                 if (preceding_letters[1] == -124 && preceding_letters[0] == -60 || preceding_letters[1] == -123 && preceding_letters[0] == -60)                                                                       //¹ 124,123
                 {
                     letter = static_cast <char>(165);
@@ -288,20 +276,27 @@ int main()
                     letter = static_cast <char>(190);
                     adding_letters();
                 }
+
+                //lowercase characters
                 else if (preceding_letters[0] >= 65 && preceding_letters[0] <= 90)                                                                                                            //zamieniamy wielkie litery na ma³e
                 {
                     letter += 32;
                     adding_letters();
                 }
+
+                //standard letter
                 else if (preceding_letters[0] >= 97 && preceding_letters[0] <= 122)                                                                                                            //sprawdzenie malej litery
                 {
                     adding_letters();
                 }
+
+                //after finding spaces, checks whether to add a word
                 else if (preceding_letters[0] == 32)                                                                                                                               //spacja nowe slowo
                 {
                     check_occurrence();
                 }
 
+                //at the end of the line of text, checks whether to add a word
                 else if (preceding_letters[0] == 0)
                 {
                     check_occurrence();
@@ -310,7 +305,7 @@ int main()
         }
     }
 
-    plik.close();
+    file.close();
 
     show_wordlist();
 
@@ -323,26 +318,33 @@ int main()
     time_to_do_wordlist = (stop - start) / CLOCKS_PER_SEC;
     cout << "Potrzebny czas: " << time_to_do_wordlist << " sekund";
 
-    int liczba_wystapien_do_zapisu_poczatek;
-    int liczba_wystapien_do_zapisu_koniec;
-    char czy_uzyc_zbednych;
+#pragma endregion
+
+
+#pragma region CreatingUserWordlist
+
+    int user_wordlist_quantity_start;            //up to what number of occurrences of words in the text should be accepted on the user's list
+    int user_wordlist_quantity_end;              //from what number of occurrences of words in the text should be included in the user's list
+    char use_known_words;                        //whether to use words saved in the file known_words.txt
 
     cout << endl;
-    cout << "Od jakiej liczby wystapien slowa zapisac na liste: (W przedzial od " << words_quantity[0] << " - " << words_quantity[words_quantity.size() - 1] << ")";
-    cin >> liczba_wystapien_do_zapisu_poczatek;
-    if (liczba_wystapien_do_zapisu_poczatek)
-        while (liczba_wystapien_do_zapisu_poczatek > words_quantity[0] || liczba_wystapien_do_zapisu_poczatek < words_quantity[words_quantity.size() - 1])
+    cout << "Od jakiej liczby wystapien slowa zapisac na liste: (W przedzial od " << word_quantity[0] << " - " << word_quantity[word_quantity.size() - 1] << ")";
+    cin >> user_wordlist_quantity_start;
+    if (user_wordlist_quantity_start)
+        while (user_wordlist_quantity_start > word_quantity[0] || user_wordlist_quantity_start < word_quantity[word_quantity.size() - 1])
         {
 
             cout << "Podano bledna wartosc" << endl;
-            cout << "Od jakiej liczby wystapien slowa zapisac na liste: (Przedzial od " << words_quantity[0] << " - " << words_quantity[words_quantity.size() - 1] << ")";
-            cin >> liczba_wystapien_do_zapisu_poczatek;
+            cout << "Od jakiej liczby wystapien slowa zapisac na liste: (Przedzial od " << word_quantity[0] << " - " << word_quantity[word_quantity.size() - 1] << ")";
+            cin >> user_wordlist_quantity_start;
         }
 
     cout << "Do jakiej liczby wystapien slowa zapisac na liste: ";
-    cin >> liczba_wystapien_do_zapisu_koniec;
+    cin >> user_wordlist_quantity_end;
     cout << "Czy przefiltrowac przez liste znanych slowek Tak/Nie";
-    cin >> czy_uzyc_zbednych;
+    cin >> use_known_words;
+#pragma endregion
+
 
     return 0;
 }
